@@ -29,18 +29,6 @@ function createHTML() {
 htmlPOC = `
 <script>
 
-var channel;
-window.addEventListener('message', onMessage);
-
-function onMessage(e) {
-	console.log(e)
-	channel = e;
-	window.frames[0].onmessage = console.log
-	window.frames[0].postMessage({
-		channel: 'did-load-resource',
-		data: {}
-	})
-}
 
 function sendMessage(){
     //send post message to frame
